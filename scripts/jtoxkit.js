@@ -5,7 +5,7 @@
 **/
 
 window.jT = window.jToxKit = {
-  version: "1.0.0", // jToxKit version. The file suffix/git tag will be extracted from here!
+  version: "1.1.1", // jToxKit version. The file suffix/git tag will be extracted from here!
 	templateRoot: null,
 
 	callId: 0,
@@ -194,6 +194,10 @@ window.jT = window.jToxKit = {
     }
     return el;
 	},
+	
+	getFillTemplate: function(selector, info) {
+		return $(ccLib.formatString($(selector).html(), info).replace(/(<img(\s+.*)?)(\s+jt-src=")/, "$1 src=\""));
+	},
 
 	insertTool: function (name, root) {
 	  var html = this.tools[name];
@@ -348,6 +352,14 @@ window.jT = window.jToxKit = {
 /* UI related functions of jToxKit are put here for more convenient usage
 */
 window.jT.ui = {
+	formatUnits: function (str) {
+		// change the exponential
+		return str.toString()
+			.replace(/(\W)?u(\w)/g, '$1&#x00B5;$2')
+			.replace(/\^\(?([\-\d]+)\)?/g, '<sup>$1</sup>')
+			.replace(/ /g, "&nbsp;")
+	}
+
   shortenedData: function (content, message, data) {
     var res = '';
 
@@ -721,7 +733,7 @@ window.jT.ui = {
       if (type == 'display') {
         unit = ccLib.trim(data.unit || unit);
         if (!!unit) {
-          out += '&nbsp;<span class="units">' + unit.replace(/ /g, "&nbsp;") + '</span>';
+          out += '&nbsp;<span class="units">' + jT.ui.formatUnits(unit) + '</span>';
         }
       }
     }
@@ -741,7 +753,7 @@ window.jT.ui = {
 		  val = '';
     }
 		if (val != '' && type != 'display' && !!data.units) {
-		  val += '&nbsp;' + data.units;
+		  val += '&nbsp;' + jT.ui.formatUnits(data.units);
     }
 		if (!!data.textValue) {
   		if (val != '' && type == 'display') {
@@ -785,7 +797,7 @@ window.jT.ui = {
     if (val != null) {
       out += ccLib.trim(val.toString()).replace(/ /g, "&nbsp;");
       if (!!unit)
-        out += '&nbsp;<span class="units">' + unit.replace(/ /g, "&nbsp;") + '</span>';
+        out += '&nbsp;<span class="units">' + jT.ui.formatUnits(unit) + '</span>';
     }
     return out;
   },

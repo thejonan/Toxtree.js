@@ -117,6 +117,9 @@ echo "Version: $version..."
 outJS="$outdir/jtoxkit-${version}.js"
 outCSS="$outdir/jtoxkit-${version}.css"
 
+cat /dev/null > $outJS
+cat /dev/null > $outCSS
+
 # form the final target list
 target="ccLib jtoxkit $target"
 

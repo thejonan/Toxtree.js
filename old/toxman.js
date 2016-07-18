@@ -19,16 +19,16 @@ window.ToxMan = {
 	inPrediction: false,			// true if we're in progress of making prediction.
 	inQuery: false,						// to prevent in making double queries. Second attempts for queries, while one is being held are ignored, not postponed.
 
-	/* A single place to hold all necessary queries. Parameters are marked with <XX> and ccLib.formatString() (ccLib.js) is used
+	/* A single place to hold all necessary queries. Parameters are marked with {{XX}} and ccLib.formatString() (ccLib.js) is used
 	to prepare the actual URLs
 	*/
 	queries: {
-		query: "/query/compound/search/all?search={0}&page=0&pagesize=1",
+		query: "/query/compound/search/all?search={{0}}&page=0&pagesize=1",
 		listModels: "/algorithm?search=ToxTree",
-		taskPoll: "/task/{0}",
-		getModel: "/model?algorithm={0}",
-		getPrediction: "/compound/{0}?feature_uris[]={1}",
-		createModel: "/algorithm/{0}"  // used in POST requests.
+		taskPoll: "/task/{{0}}",
+		getModel: "/model?algorithm={{0}}",
+		getPrediction: "/compound/{{0}}?feature_uris[]={{1}}",
+		createModel: "/algorithm/{{0}}"  // used in POST requests.
 	},
 
 	featurePrefix: 'http://www.opentox.org/api/1.1#',

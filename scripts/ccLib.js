@@ -316,12 +316,31 @@ var ccLib = {
     }
   },
 
-	/* formats a string, replacing {number | property} in it with the corresponding value in the arguments
+	/* formats a string, replacing {{number | property}} in it with the corresponding value in the arguments
   */
-  formatString: function(format, pars) {
-    for (var i in pars)
-      format = format.replace('{' + i + '}', pars[i]);
-    return format;
+  formatString: function(str, info, def) {
+		var pieces = str.split(/{{(\w+)}}/),
+				pl = pieces.length,
+				out = "",
+				i, f;
+		
+		for (i = 0;; ++i) {
+			out += pieces[i++];
+			if (i >= pl)
+				break;
+				
+			f = this.getJsonValue(info, pieces[i]);
+			if (f != null) // i.e. we've found it.
+				out += f;
+			else if (typeof def === 'function') // not found, but we have default function.
+				out += def(pieces[i]);
+			else if (typeof def === 'string') // not found, but default string.
+				out += def;
+			else // we have nothing, so - put nothing.
+				out += "";
+		}
+		
+		return out;
   },
 
   // Present a number in a brief format, adding 'k' or 'm', if needed.
@@ -443,6 +462,29 @@ var ccLib = {
       relative: (a.href.match(/tps?:\/\/[^\/]+(.+)/) || [,''])[1],
       segments: a.pathname.replace(/^\//,'').split('/')
     };
+  },
+  
+  modifyURL: function (url, name, value) {
+    var a =  document.createElement('a'),
+    		str = !!value ? name + "=" + encodeURIComponent(value) : "",
+    		mbs, q;
+    		
+  	a.href = url;
+  	q = a.search;
+
+		mbs = q.match(new RegExp(name + "=[\\S^&]+"))
+
+		if (!!mbs)
+			q = q.replace(mbs[0], str);
+		else if (!str)
+			return;
+		else if (q.charAt(0) == '?')
+			q = "?" + str;
+		else
+			q += (q.slice(-1) == "&" ? "" : "&") + str;
+			
+		a.search = q;
+		return a.href;
   },
 
   escapeHTML: function(str){
