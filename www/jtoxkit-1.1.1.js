@@ -883,7 +883,7 @@ window.jT.ui = {
 			.replace(/(\W)?u(\w)/g, '$1&#x00B5;$2')
 			.replace(/\^\(?([\-\d]+)\)?/g, '<sup>$1</sup>')
 			.replace(/ /g, "&nbsp;")
-	}
+	},
 
   shortenedData: function (content, message, data) {
     var res = '';
