@@ -142,6 +142,7 @@ done
 if [ $minimize -eq 1 ]; then
 	echo "Minification..."
 	./jsminify.pl $outJS > "$outdir/jtoxkit-${version}.min.js"
+	ln -sf "$outdir/jtoxkit-${version}.min.js" "$outdir/jtoxkit.min.js"
 fi
 
 echo "Merging CSS files from [$cssdir] ..."

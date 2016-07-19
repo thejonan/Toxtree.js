@@ -34,8 +34,12 @@
   padding: 5px;
 }
 
-.jtox-foldable.folded>.content {
+.jtox-foldable.folded>* {
   display: none;
+}
+
+.jtox-foldable.folded>.title {
+  display: block !important;
 }
 
 .jtox-foldable.folded>.title {

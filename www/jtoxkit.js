@@ -1,1 +1,1 @@
-/Users/jonan/CCC/IDEAConsult/jToxKit/www/jtoxkit-1.1.1.js
+/Users/jonan/CCC/IDEAConsult/jToxKit/www/jtoxkit-1.1.2.js

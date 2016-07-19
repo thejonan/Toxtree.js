@@ -5,7 +5,7 @@
 **/
 
 window.jT = window.jToxKit = {
-  version: "1.1.1", // jToxKit version. The file suffix/git tag will be extracted from here!
+  version: "1.1.2", // jToxKit version. The file suffix/git tag will be extracted from here!
 	templateRoot: null,
 
 	callId: 0,
@@ -123,7 +123,10 @@ window.jT = window.jToxKit = {
       // make this handler for UUID copying. Once here - it's live, so it works for all tables in the future
       self.$(document).on('click', '.jtox-toolkit span.ui-icon-copy', function () { ccLib.copyToClipboard(self.$(this).data('uuid')); return false;});
       // install the click handler for fold / unfold
-      self.$(document).on('click', '.jtox-foldable>.title', function() { self.$(this).parent().toggleClass('folded'); });
+      self.$(document).on('click', '.jtox-foldable>.title,.jtox-foldable.shallow', function(e) {
+	      if (e.currentTarget == this)
+	      	self.$(this).closest('.jtox-foldable').toggleClass('folded'); 
+	    });
       // install diagram zooming handlers
       self.$(document).on('click', '.jtox-diagram span.ui-icon', function () {
         self.$(this).toggleClass('ui-icon-zoomin').toggleClass('ui-icon-zoomout');
