@@ -151,4 +151,8 @@ for t in ${target[@]}; do
 	fi
 done
 
+# Finally link the placeholders with the latest ones.
+ln -sf $outJS $outdir/jtoxkit.js
+ln -sf $outCSS $outdir/jtoxkit.css
+
 echo "Done."
