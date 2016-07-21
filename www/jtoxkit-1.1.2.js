@@ -290,7 +290,7 @@ var ccLib = {
           if ($(fixed).hasClass('cc-flex'))
             break;
         if (fixed == el.offsetParent)
-          sum += horiz ? this.offsetWidth : this.offsetHeight;
+          sum += $(this)[horiz ? "outerWidth" : "outerHeight"](true);
       });
       el.style[horiz ? 'width' : 'height'] = (this.offsetParent[horiz ? 'clientWidth' : 'clientHeight'] - sum) + 'px';
     });
