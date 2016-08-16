@@ -5,7 +5,7 @@
 **/
 
 window.jT = window.jToxKit = {
-  version: "1.1.2", // jToxKit version. The file suffix/git tag will be extracted from here!
+  version: "1.1.3", // jToxKit version. The file suffix/git tag will be extracted from here!
 	templateRoot: null,
 
 	callId: 0,

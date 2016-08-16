@@ -319,7 +319,7 @@ var ccLib = {
 	/* formats a string, replacing {{number | property}} in it with the corresponding value in the arguments
   */
   formatString: function(str, info, def) {
-		var pieces = str.split(/{{(\w+)}}/),
+		var pieces = str.split(/{{([^}]+)}}/),
 				pl = pieces.length,
 				out = "",
 				i, f;
