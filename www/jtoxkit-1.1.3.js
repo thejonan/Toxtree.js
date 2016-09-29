@@ -1539,6 +1539,7 @@ var jToxSearch = (function () {
   };
 
   var queries = {
+    'text': "/query/compound/search/all",
     'auto': "/query/compound/search/all",
     'uri': "/query/compound/url/all",
     'similarity': "/query/similarity",
@@ -1567,6 +1568,8 @@ var jToxSearch = (function () {
         jT.$('label[for="search' + hideArr[i] + '"]', self.rootElement).remove();
       }
     }
+    
+    jT.$('input', self.rootElement)[0].checked = true;
 
     if (!!form.searchcontext) {
       form.searchcontext.value = self.settings.contextUri;
@@ -4992,7 +4995,9 @@ jT.templates['widget-search']  =
 "    <div id=\"jtox-search\" class=\"jtox-search\">" +
 "      <form>" +
 "  	  	<div class=\"jq-buttonset jtox-inline\">" +
-"  			  <input type=\"radio\" id=\"searchauto\" value=\"auto\" name=\"searchtype\" checked=\"checked\" data-placeholder=\"Enter CAS, EINECS, Chemical name, SMILES or InChI_\"/>" +
+"  			  <input type=\"radio\" id=\"searchtext\" value=\"text\" name=\"searchtype\" data-placeholder=\"Enter free text phrase...\"/>" +
+"			    <label for=\"searchtext\" title=\"Enter free text phrase\">Free-text</label>" +
+"  			  <input type=\"radio\" id=\"searchauto\" value=\"auto\" name=\"searchtype\" data-placeholder=\"Enter CAS, EINECS, Chemical name, SMILES or InChI_\"/>" +
 "			    <label for=\"searchauto\" title=\"Exact structure or search by an identifier. CAS, Chemical name, SMILES or InChI. The input type is guessed automatically.\">Exact structure</label>" +
 "  			  <input type=\"radio\" id=\"searchsimilarity\" value=\"similarity\" name=\"searchtype\" data-placeholder=\"Enter Chemical name, SMILES or InChI_\"/>" +
 "			    <label for=\"searchsimilarity\" title=\"Enter SMILES or draw structure\">Similarity</label>" +

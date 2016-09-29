@@ -102,6 +102,7 @@ var jToxSearch = (function () {
   };
 
   var queries = {
+    'text': "/query/compound/search/all",
     'auto': "/query/compound/search/all",
     'uri': "/query/compound/url/all",
     'similarity': "/query/similarity",
@@ -130,6 +131,8 @@ var jToxSearch = (function () {
         jT.$('label[for="search' + hideArr[i] + '"]', self.rootElement).remove();
       }
     }
+    
+    jT.$('input', self.rootElement)[0].checked = true;
 
     if (!!form.searchcontext) {
       form.searchcontext.value = self.settings.contextUri;
