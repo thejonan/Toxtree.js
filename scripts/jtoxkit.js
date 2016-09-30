@@ -44,17 +44,16 @@ window.jT = window.jToxKit = {
 
   // initializes one kit, based on the kit name passed, either as params, or found within data-XXX parameters of the element
   initKit: function(element) {
-    var self = this;
-
-  	var dataParams = self.$(element).data();
-  	var kit = dataParams.kit;
-  	var topSettings = self.$.extend(true, {}, self.settings);
-  	var parent = null;
+    var self = this,
+        dataParams = self.$(element).data(),
+        kit = dataParams.kit,
+        topSettings = self.$.extend(true, {}, self.settings),
+        parent = null;
 
   	// we need to traverse up, to collect some parent's settings...
   	self.$(self.$(element).parents('.jtox-toolkit').toArray().reverse()).each(function(){
   	  parent = self.kit(this);
-    	if (!self.$(this).hasClass('jtox-widget') && parent != null) {
+    	if (parent != null) {
       	topSettings = self.$.extend(true, topSettings, parent.settings);
     	}
   	});
@@ -69,12 +68,15 @@ window.jT = window.jToxKit = {
 	  // the real initialization function
     var realInit = function (params) {
     	if (!kit)
-    		return null;
+        return null;
+        
       // add jTox if it is missing AND there is not existing object/function with passed name. We can initialize ketcher and others like this too.
-    	if (!window[kit] && kit.indexOf('jTox') != 0)
-  	  	kit = 'jTox' + kit.charAt(0).toUpperCase() + kit.slice(1);
-
     	var fn = window[kit];
+    	if (typeof fn !== 'function') {
+  	  	kit = 'jTox' + kit.charAt(0).toUpperCase() + kit.slice(1);
+  	  	fn = window[kit];
+  	  }
+
     	var obj = null;
       if (typeof fn == 'function')
     	  obj = new fn(element, params);

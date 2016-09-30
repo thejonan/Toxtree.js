@@ -8,8 +8,10 @@ var jToxQuery = (function () {
   var defaultSettings = { // all settings, specific for the kit, with their defaults. These got merged with general (jToxKit) ones.
     scanDom: true,          // whether to scan the whole DOM for finding the main query kit
     initialQuery: false,    // whether to perform an initial query, immediatly when loaded.
-    kitSelector: null,      // selector for the main kit, if outside, for example.
+    mainKit: null,          // the mainKit object as it should be used for the actual queries.
+    widgets: null,          // the widgets that participate in query URI preparation.
     dom: null,              // an, all-prepared object with all sub-kits. Structure { kit: <main kit object>, widgets: { <kit type>: <widget kit object> } }
+    onTypeChanged: null,    // function (newType, oldType, searchKit) in the context of input element - invoked on type change. 
 
     configuration: {
       // this is the main thing to be configured
@@ -25,7 +27,8 @@ var jToxQuery = (function () {
     jT.$(root).addClass('jtox-toolkit'); // to make sure it is there even when manually initialized
 
     self.settings = jT.$.extend(true, {}, defaultSettings, jT.settings, settings);
-    self.mainKit = null;
+    self.mainKit = !self.settings.mainKit ? null : (typeof self.settings.mainKit === 'function' ? self.settings.mainKit : window[self.settings.mainKit]);
+    self.widgets = self.settings.widgets || {};
 
     if (self.settings.scanDom && !self.settings.dom) {
       self.settings.dom = { kit: null, widgets: { } };
@@ -45,8 +48,11 @@ var jToxQuery = (function () {
       self.initialQueryTimer = setTimeout(function () { self.query(); }, 200);
   };
 
-  cls.prototype.widget = function (name) {
-    return this.settings.dom.widgets[name];
+  cls.prototype.widget = function (name, val) {
+    if (val != null)
+      this.widgets[name] = val;
+      
+    return this.widgets[name];
   };
 
   cls.prototype.kit = function () {
@@ -54,10 +60,6 @@ var jToxQuery = (function () {
       this.mainKit = jT.kit(this.settings.dom.kit);
 
     return this.mainKit;
-  };
-
-  cls.prototype.setWidget = function (id, dom) {
-    this.settings.dom.widgets[id] = dom;
   };
 
   cls.prototype.cancelInitialQuery = function () {
@@ -69,15 +71,20 @@ var jToxQuery = (function () {
   alter the given URL, then - makes the call */
   cls.prototype.query = function () {
     var uri = this.settings.service || '';
-    for (var w in this.settings.dom.widgets) {
-      var widget = jT.kit(this.settings.dom.widgets[w]);
-      if (!widget)
-        console.log("jToxError: the widget [" + w + "] is not recognized: ignored");
-      else if (!widget['modifyUri'])
-        console.log("jToxError: the widget [" + w + "] doesn't have 'modifyUri' method: ignored");
-      else
-        uri = widget.modifyUri(uri);
+    if (jT.$.isEmptyObject(this.widgets)) {
+      for (var w in this.settings.dom.widgets) {
+        var widget = jT.kit(this.settings.dom.widgets[w]);
+        if (!widget)
+          console.log("jToxError: the widget [" + w + "] is not recognized: ignored");
+        else if (!widget['modifyUri'])
+          console.log("jToxError: the widget [" + w + "] doesn't have 'modifyUri' method: ignored");
+        else
+          this.widgets[w] = widget;
+      }
     }
+    
+    for (var name in this.widgets)
+      uri = this.widgets[name].modifyUri(uri);
 
     if (!!uri)
       this.kit().query(uri);
@@ -93,6 +100,7 @@ var jToxSearch = (function () {
   var defaultSettings = { // all settings, specific for the kit, with their defaults. These got merged with general (jToxKit) ones.
     defaultNeedle: '50-00-0',     // which is the default search string, if empty one is provided
     smartsList: 'funcgroups',     // which global JS variable to seek for smartsList
+    minSimilarity: null,          // minimum allowed similarity - a numeric in the range 0.0…0.99
     hideOptions: '',              // comma separated list of search options to hide
     slideInput: false,            // whether to slide the input, when focussed
     contextUri: null,             // a search limitting contextUri - added as dataset_uri parameter
@@ -132,7 +140,14 @@ var jToxSearch = (function () {
       }
     }
     
-    jT.$('input', self.rootElement)[0].checked = true;
+    // filter out similarities below this given level
+    if (self.settings.minSimilarity != null) {
+      self.settings.minSimilarity = parseFloat(self.settings.minSimilarity);
+      jT.$('option', form.threshold).each(function (el) {
+        if (parseFloat(jT.$(this).attr('value')) < self.settings.minSimilarity)
+          this.parentNode.removeChild(this);
+      });
+    }
 
     if (!!form.searchcontext) {
       form.searchcontext.value = self.settings.contextUri;
@@ -182,6 +197,7 @@ var jToxSearch = (function () {
 
     var radios = jT.$('.jq-buttonset', root).buttonset();
     var onTypeClicked = function () {
+      var oldType = self.search.queryType;
       form.searchbox.placeholder = jT.$(this).data('placeholder');
       jT.$('.search-pane .auto-hide', self.rootElement).addClass('hidden');
       jT.$('.search-pane .' + this.id, self.rootElement).removeClass('hidden');
@@ -196,15 +212,12 @@ var jToxSearch = (function () {
         if (hasAutocomplete)
           jT.$(form.searchbox).autocomplete('disable');
       }
+      
+      ccLib.fireCallback(self.settings.onTypeChanged, this, self.search.queryType, oldType, self);
     };
 
     jT.$('.jq-buttonset input', root).on('change', onTypeClicked);
-
-    var typeEl = jT.$('#search' + self.settings.option, root)[0];
-    if (typeEl != null)
-      jT.$(typeEl).trigger('click');
-    else
-      ccLib.fireCallback(onTypeClicked, jT.$('.jq-buttonset input', root)[0])
+    jT.$(self.settings.option != null ? '#search' + self.settings.option : '.jq-buttonset input', root).first().trigger('click');
 
     // spend some time to setup the SMARTS groups
     if (!!window[self.settings.smartsList]) {
@@ -335,15 +348,12 @@ var jToxSearch = (function () {
     if (type == "auto" && form.regexp.checked) {
       params['condition'] = "regexp";
     }
-    if (type == 'similarity') {
+    else if (type == 'similarity') {
       params.threshold = form.threshold.value;
+      params.filterBySubstance = form.searchsimilarsubstance && form.searchsimilarsubstance.checked;
     }
-
-    if (type == 'similarity') {
-      params.filterBySubstance = form.similaritybysubstance.checked;
-    }
-    if (type == 'smarts') {
-      params.filterBySubstance = form.smartsbysubstance.checked;
+    else if (type == 'smarts') {
+      params.filterBySubstance = form.searchsubsubstance && form.searchsubsubstance.checked;
     }
 
     if (!!this.settings.contextUri)

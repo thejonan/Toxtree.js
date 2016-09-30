@@ -771,7 +771,7 @@ var jToxBundle = {
     var self = this;
     if (!self.queryKit) {
       self.queryKit = jT.kit($('#jtox-query')[0]);
-      self.queryKit.setWidget("bundle", self.rootElement);
+      self.queryKit.widget("bundle", self);
       self.queryKit.kit().settings.fixedWidth = '200px';
       // provid onRow function so the buttons can be se properly...
       self.queryKit.kit().settings.onRow = function (row, data, index) {
@@ -1105,7 +1105,7 @@ var jToxBundle = {
 
     if (!self.reportQueryKit) {
       self.reportQueryKit = jT.kit($('#jtox-report-query')[0]);
-      self.reportQueryKit.setWidget("bundle", self.rootElement);
+      self.reportQueryKit.widget("bundle", self);
       self.reportQueryKit.kit().settings.fixedWidth = '200px';
       // provid onRow function so the buttons can be se properly...
       self.reportQueryKit.kit().settings.onRow = function (row, data, index) {
@@ -1400,7 +1400,7 @@ var jToxBundle = {
 
     var kit = jT.kit(rootEl);
 
-    kit.setWidget("bundle", self.rootElement);
+    kit.widget("bundle", self);
     kit.kit().settings.fixedWidth = '100%';
     kit.kit().settings.bUri = self.bundleUri;
 

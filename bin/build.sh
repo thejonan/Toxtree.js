@@ -89,27 +89,6 @@ fi
 outdir=`pwd`
 popd > /dev/null
 
-# First prepare the libraries, if any
-curdir=`pwd`
-
-for l in "${libs[@]}"; do
-	base=$(basename $l)
-	name="${base%.*}"
-	
-	echo "Backing tool [$name]..."
-	pushd $(dirname $l) > /dev/null
-	if [[ "$tools" =~ "$name" ]]; then
-		"$curdir/htmlextract.pl" --css --include $name <$base >"$outdir/$name.css"
-		"$curdir/htmlextract.pl" --js --include $name <$base >"$outdir/$name.js"
-	else
-		"$curdir/htmlextract.pl" --css --exclude jquery <$base >"$outdir/$name.css"
-		"$curdir/htmlextract.pl" --js --exclude jquery <$base >"$outdir/$name.js"
-	fi
-	"$curdir/html2js.pl" --trim --body-var "jT.tools['$name']" <$base >>"$outdir/$name.js"
-	popd > /dev/null
-done
-
-
 # Extract the version and prepare the outputs
 version=`sed -En -e 's/^[ \t]+version:[ \t]+"([0-9\.]+)",[ \t]+\/\/.+$/\1/p' $jsdir/jtoxkit.js`
 echo "Version: $version..."
@@ -120,7 +99,7 @@ outCSS="$outdir/jtoxkit-${version}.css"
 cat /dev/null > $outJS
 cat /dev/null > $outCSS
 
-# form the final target list
+# First prepare the basic library from the final target list
 target="ccLib jtoxkit $target"
 
 # start the building process...
@@ -139,6 +118,28 @@ for t in ${target[@]}; do
 	fi
 done
 
+# Now prepare the libraries, if any
+curdir=`pwd`
+
+for l in "${libs[@]}"; do
+	base=$(basename $l)
+	name="${base%.*}"
+	
+	echo "Backing tool [$name]..."
+	pushd $(dirname $l) > /dev/null
+	if [[ "$tools" =~ "$name" ]]; then
+		"$curdir/htmlextract.pl" --css --include $name <$base >>$outCSS
+		"$curdir/htmlextract.pl" --js --include $name <$base >>$outJS
+	else
+		"$curdir/htmlextract.pl" --css --exclude jquery <$base >$outCSS
+		"$curdir/htmlextract.pl" --js --exclude jquery <$base >>$outJS
+	fi
+	
+	"$curdir/html2js.pl" --trim --body-var "jT.tools['$name']" <$base >>$outJS
+	popd > /dev/null
+done
+
+# Finally go with the packaging stuff
 if [ $minimize -eq 1 ]; then
 	echo "Minification..."
 	./jsminify.pl $outJS > "$outdir/jtoxkit-${version}.min.js"
