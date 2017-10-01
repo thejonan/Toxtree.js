@@ -29,7 +29,7 @@
 
   <script language="javascript">
     $(document).ready(function(){
-      window['ds'] = new jToxCompound($(".jtox-toolkit")[0], {rememberChecks: true, hideEmpty: true} );
+      window['ds'] = new jToxCompound($(".jtox-toolkit")[0], {rememberChecks: true, hideEmpty: true, extraTabs: [ "Extra 1", "Extra 2" ]} );
 //       ds.queryDataset("http://apps.ideaconsult.net:8080/data/dataset/18?feature_uris[]=http://apps.ideaconsult.net:8080/toxbank/model/6/predicted");
 //       ds.queryDataset("http://apps.ideaconsult.net:8080/data/dataset/1", "http://apps.ideaconsult.net:8080/data/dataset/1/feature");
       ds.queryDataset("https://apps.ideaconsult.net/data/bundle/1/dataset");

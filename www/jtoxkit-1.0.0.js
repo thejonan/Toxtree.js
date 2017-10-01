@@ -2070,11 +2070,11 @@ cls.prototype.init = function () {
 
       ccLib.fireCallback(self.settings.onTab, self, divEl, tabLi, grName, isMain);
     }
-
+    
     if (isMain && self.settings.showExport) {
-      var tabId = "jtox-ds-export-" + self.instanceNo;
-      var liEl = createATab(tabId, "Export");
-      jT.$(liEl).addClass('jtox-ds-export');
+      var tabId = "jtox-ds-export-" + self.instanceNo,
+          liEl = createATab(tabId, "Export");
+      jT.$(liEl).addClass('jtox-ds-auxtab');
       var divEl = jT.getTemplate('#jtox-ds-export')
       divEl.id = tabId;
       all.appendChild(divEl);
@@ -2092,6 +2092,24 @@ cls.prototype.init = function () {
       }
 
       ccLib.fireCallback(self.settings.onTab, self, divEl, liEl, "Export", isMain);
+    }
+
+    if (isMain && self.settings.extraTabs) {
+      if (typeof self.settings.extraTabs === "string")
+        self.settings.extraTabs = self.settings.extraTabs.split(",");
+      if (!Array.isArray(self.settings.extraTabs))
+        self.settings.extraTabs = [ self.settings.extraTabs ];
+        
+      self.settings.extraTabs.reverse().forEach(function (name, idx) {
+        var tabId = "jtox-ds-extra-" + (self.settings.extraTabs.length - idx),
+            liEl = createATab(tabId, name),
+            divEl = document.createElement('div');
+        divEl.id = tabId;
+        jT.$(liEl).addClass('jtox-ds-auxtab');
+        all.appendChild(divEl);
+  
+        ccLib.fireCallback(self.settings.onTab, self, divEl, liEl, name, isMain);
+      });
     }
 
     // now show the whole stuff and mark the disabled tabs
