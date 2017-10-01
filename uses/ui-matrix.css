@@ -315,6 +315,14 @@ tr:last-child .jtox-down {
   overflow: auto;
 }
 
+button.jt-model-runner {
+  margin-top: 10px;
+}
+
+button.jt-model-runner:disabled {
+  color: #999;
+}
+
 #jtox-report {
   counter-reset: section annexes;
 }

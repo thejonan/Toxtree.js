@@ -2631,7 +2631,7 @@ cls.prototype.init = function () {
 
     return ccLib.addParameter(self.datasetUri, "page=" + Math.floor(scope.from / scope.size) + "&pagesize=" + scope.size);
   };
-
+  
   // make the actual query for the (next) portion of data.
   cls.prototype.queryEntries = function(from, size, dataset) {
     var self = this;
@@ -2782,7 +2782,7 @@ cls.prototype.init = function () {
   /* This is a needed shortcut that jToxQuery routine will call
   */
   cls.prototype.query = function (uri) {
-    this.queryDataset(uri);
+    this.queryDataset(uri || this.datasetUri);
   }; 
   // end of prototype
 

@@ -1439,8 +1439,8 @@ var jToxBundle = {
             var theData = full.values[fId];
             var preVal = (ccLib.getJsonValue(config, 'effects.endpoint.bVisible') !== false) ? "<strong>"+f.title+"</strong>" : null;
 
-            var icon = f.isModelPredictionFeature?"ui-icon-calculator":"ui-icon-tag";
-            var studyType = "<span class='ui-icon "+icon+"' title='" + f.source.type + "'></span>";
+            var icon = f.isModelPredictionFeature ? "ui-icon-calculator" : "ui-icon-tag";
+            var studyType = "<span class='ui-icon " + icon + "' title='" + f.source.type + "'></span>";
             //preVal = [preVal, f.source.type].filter(function(value){return value!==null}).join(' : ');
 
             var postVal = '', postValParts = [], parameters = [], conditions = [];
@@ -1612,6 +1612,7 @@ var jToxBundle = {
     conf.baseFeatures['http://www.opentox.org/api/1.1#CASRN'].primary = true;
 
     var featuresInitialized = false;
+        algorithmList = null;
 
     matrixKit = new jToxCompound(rootEl, {
       rememberChecks: true,
@@ -1622,13 +1623,72 @@ var jToxBundle = {
       fixedWidth: "650px",
       configuration: conf,
       featureUri: self.bundleUri + '/property',
+      extraTabs: "Models",
+      onTab: function (divEl, liEl, name, isMain) {
+        var firstOne = algorithmList === null,
+            selectedAlgos = {},
+            runningModelsCnt = 0,
+            runButtonEl = null,
+            loadFn = function (result) { if (!!result) algorithmList = result.algorithm; },
+            modelKit = new jToxModel(divEl, {
+              algorithms: true,
+              onLoaded: firstOne ? loadFn : null,
+              selectionHandler: function (e) { 
+                var uri = modelKit.table.dataTable().fnGetData(this.parentElement);
+                if (this.checked) {
+                  selectedAlgos[uri] = this;
+                  ++runningModelsCnt;
+                }
+                else {
+                  --runningModelsCnt;
+                  delete selectedAlgos[uri];
+                }
+                if (runningModelsCnt > 0)
+                  runButtonEl.prop("disabled", false).html("Run " + runningModelsCnt + " selected models.");
+                else
+                  runButtonEl.prop("disabled", true).html("Select models to run");
+              },
+              loadOnInit: firstOne
+            });
+            
+        if (name.toLowerCase() != "models")
+          return;
+        if (!firstOne)
+          $(modelKit.table).dataTable().fnAddData(algorithmList)
+        
+        runButtonEl = $('<button class="jt-model-runner" disabled>Select models to run</button>')
+        .appendTo(divEl)
+        .on('click', function (e) {
+          $(this).prop("disabled", true).html("Running " + runningModelsCnt + " models...");
+          for (var algoUri in selectedAlgos) {
+            var el = selectedAlgos[algoUri],
+                completeFn = function (el, result) {
+                  $(el.parentNode).removeClass("loading");
+                  --runningModelsCnt;
+                  if (runningModelsCnt == 0)
+                    matrixKit.query();
+                    // Note: This will re-create the whole table, anyways.
+                    // TODO: This, potentially, can be improved by just adding the provided result.
+                    // However, this could lead to feature, i.e. colulm recalculating, preparing, etc.
+                };
+            
+            $(el.parentNode).addClass("loading");
+            modelKit.getModel(algoUri, function (modelUri) {
+              if (!modelUri)
+                completeFn(el);
+              else
+                modelKit.runPrediction(matrixKit.datasetUri, modelUri, function (result) { completeFn(el, result); });
+            });
+          }
+        });
+      },
       onPrepared: function (miniset, kit) {
         if (featuresInitialized)
           return;
         // this is when we have the features combined, so we can make the multi stuff
         var getRender = function (fId, oldData, oldRender) {
           return function (data, type, full) {
-            return typeof data != 'object' ? '-' : jT.ui.renderMulti(data, type, full, function (_data, _type, _full){
+            return typeof data != 'object' ? '-' : jT.ui.renderMulti(data, type, full, function (_data, _type, _full) {
               var dt = ccLib.getJsonValue(_data, (fId.indexOf('#Diagram') > 0 ? 'component.' : '') + oldData);
               return (typeof oldRender == 'function' ? oldRender(dt, _type, fId.indexOf('#Diagram') > 0 ? _data.component : _data) : dt);
             });
@@ -1669,8 +1729,7 @@ var jToxBundle = {
 
     });
 
-    return matrixKit;
-
+  return matrixKit;
   },
 
   load: function(bundleUri) {
